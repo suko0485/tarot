@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "tarot:blocks/tarot_table",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tarot:tarot_table"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}
