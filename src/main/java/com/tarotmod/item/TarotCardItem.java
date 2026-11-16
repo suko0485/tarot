@@ -2,7 +2,7 @@ package com.tarotmod.item;
 
 import com.tarotmod.card.TarotCard;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.TooltipDisplay;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -46,7 +46,7 @@ public class TarotCardItem extends Item {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, Item.TooltipContext ctx, TooltipDisplay display,
+    public void appendTooltip(ItemStack stack, Item.TooltipContext ctx, TooltipDisplayComponent display,
                               Consumer<Text> out, TooltipType type) {
         int lvl = level(stack);
         out.accept(Text.literal(card.numeral() + " · Carta " + TarotCard.LEVEL_NAMES[lvl]).formatted(Formatting.GOLD));
