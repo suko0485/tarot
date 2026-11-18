@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "minecraft:amethyst_shard"
+  ],
+  "result": {
+    "id": "tarot:grimoire",
+    "count": 1
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "tarot:blocks/arcane_altar",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tarot:arcane_altar"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}

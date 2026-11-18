@@ -1,31 +1,32 @@
 # Arcanos: Mod del Tarot (Fabric 1.21.11)
 
 ## Compilar
-Requiere JDK 21 y Gradle 9.2+ (o generá el wrapper con `gradle wrapper`).
-    gradle build          # jar en build/libs/
-    gradle runClient      # probar en el juego
+JDK 21 + Gradle 9.2+ (o `gradle wrapper`). `gradle build` -> jar en `build/libs/`.
+Las 22 cartas son ilustraciones 128x128 estilo Rider-Waite (`gen_cards.py`, `rw_lib.py`, `rw_scenes*.py`; requiere Pillow y numpy). Para regenerar texturas, modelos, modelos, lang, recetas y logros: `python3 gen_assets.py` (solo stdlib).
 
-## Estructura
-- card/      TarotCard (datos), TarotCards (registro: 8 cartas), CardAbilities (activas + pasivas)
-- item/      TarotCardItem, DestinyDeckItem (Mazo), BoosterPackItem, GrimoireItem, ModItems, ModComponents (nivel de carta)
-- block/     TarotTableBlock (Mesa de Lectura), ModBlocks
-- screen/    TarotTableScreenHandler (lectura + fusión), ModScreens
-- prophecy/  ProphecyManager (Fortuna / Peligro / Encuentro), TraderOffers
-- client/    TarotClient, TarotTableScreen (GUI)
+## Bucle de progresión
+1. **Exploración**: Santuarios (ruinas 11x11, cofre oculto bajo una baldosa agrietada, El Vidente) o comerciar con El Vidente -> primeros Sobres. Mesa del Tarot (receta) y Mazo (papel + Polvo Estelar).
+2. **Colección**: cada carta nueva = +1 Punto de Destino. 5 cartas: +1 pasiva activa en el Mazo · 10: +2 espacios · 15: energía arcana (Polvo cada 2 min) · 22: +4 espacios y +5 puntos.
+3. **Profecías** (Mesa: 3 cartas + amatista o 5 niveles): se cumplen a los 2-5 min. Fortuna (meteorito + cofre con Esquirlas), Peligro (oscuridad, emboscada y mini-jefe), Encuentro (mercader místico 4 min).
+4. **Jefes** (Altar Arcano, 3 cartas-llave): Hierofante (Torre+Mago+Sol) · Sombra de la Luna, de noche (Estrella+Loco+Carro) · Juicio Final (Rueda+Estrella+Emperatriz+3 Páginas). 2 fases, ataques telegrafiados, esbirros.
+5. **Ascensión** (Mesa, botón Fusionar): 2 cartas iguales + 2 Polvo + Esquirla = Astral · 2 Astrales + 4 Polvo + material de jefe = Cósmica (Fortuna: Lágrima Astral · Peligro: Corona Rota · Encuentro: Corazón del Destino). Las Cósmicas abren los nodos finales del Árbol.
 
-## Cómo se juega
-- Carta en la mano: clic derecho = activa. Carta en la mano secundaria = pasiva (cada 1 s).
-- Mazo: clic = robar · shift+clic con carta en la otra mano = guardarla.
-- Mesa: 3 cartas + 1 amatista (o 5 niveles) -> "Leer futuro" -> profecía en 1-10 min.
-- Fusión: 2 cartas iguales del mismo nivel + Polvo Estelar (2 para Astral, 4 para Cósmica).
-- Recetas: Polvo Estelar (amatista + polvo de piedra luminosa), Mesa, Grimorio, Sobre, Mazo.
+## Árbol del Destino (tecla Z, configurable)
+3 ramas x 5 nodos: Vidente (cooldown, sobres, tesoros, mazo), Arcanista (daño, radio, ahorro, efectos), Sobreviviente (resistencia, curación, escudo fatal, almas).
+Datos en `<mundo>/tarot_data.json`, sincronizados con `SyncPayload` / `UnlockPayload`.
 
-## Agregar una carta
-1. Una línea en TarotCards.java + sus dos métodos en CardAbilities.java.
-2. Agregarla en tarot-mod/gen_assets (textura, lang) o a mano.
+## Cartas
+Clic derecho = activa (cuesta Polvo Estelar, o 3 niveles de XP por Polvo; cooldown visible en el ítem). Pasiva: mano secundaria o primeras N cartas del Mazo.
 
-## Pendiente / conocido
-- Mago: el descuento de XP al encantar necesita un mixin (hoy da Prisa).
-- Rueda: duplica XP, no el loot (necesita mixin/accessor de dropLoot).
-- Profecías en memoria: se pierden al reiniciar el servidor.
-- Falta: Arcanos restantes, Menores, jefes, Altar, estructuras, Vidente aldeano, expansiones.
+## Estado
+El entorno de generación no tenía acceso a Maven: el código **no fue compilado**. Si `gradle build` marca algo, los puntos más probables son
+`KeyBinding.Category.create` (TarotClient), `Entity.velocityModified`, `getAdvancementLoader().get(...)` (DestinyManager.grant) y la firma de `Screen.renderBackground`.
+
+## Sistema de lectura (v0.2)
+- Cartas **invertidas** (~25% al abrir sobres): cuestan 1 Polvo menos, enfrían 25% más lento y empujan la profecía hacia el Peligro.
+- `card/Meanings.java`: significado derecha/invertida de las 22 cartas (editable; pendiente de revisión por una tarotista). Se ve en tooltip y Grimorio.
+- La Mesa imprime una **lectura interpretada** (Pasado/Presente/Futuro). La carta del Futuro vuelve al jugador: si la lleva encima al cumplirse la profecía está **preparado** (Fortuna: más botín · Peligro: menos enemigos y mini-jefe débil · Encuentro: mejores ofertas).
+- Pendiente: carta del día, otras tiradas, jefes "legibles" antes de invocarlos.
+- Botón **Consejo** en la Mesa (1 carta en Futuro). `card/Readings.java`: narrativa por posición, combinaciones (Torre+Muerte, Sol+Luna...) y veredicto por cartas invertidas.
+- **Ruleta del destino** (La Rueda, llevándola encima): ante un golpe mortal, el jugador queda a 1 de vida mientras una ruleta (~4 s) decide VIDA/MUERTE: 40% Normal, 50% Astral, 60% Cósmica. Si vive, 3 min de enfriamiento y empuja a los enemigos; si pierde, muere. No actúa contra `/kill` ni el vacío.
+- **Cielo Rojo + Grieta** (`SkyEvent`, `SkyPayload`, `client/SkyOverlay`): se dispara con una tirada que incluya El Diablo, La Torre o La Muerte, con el Augurio de Peligro y al sellar el Pacto del Diablo. Partículas en forma de grieta sobre el jugador + velo rojo en pantalla. Usa `HudElementRegistry` (Fabric API); si no compila, cambiar por `HudRenderCallback`.
