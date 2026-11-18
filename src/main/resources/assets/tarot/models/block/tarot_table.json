@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/cube_bottom_top",
-  "textures": {
-    "top": "tarot:block/tarot_table_top",
-    "side": "tarot:block/tarot_table_side",
-    "bottom": "tarot:block/tarot_table_bottom"
-  }
-}
